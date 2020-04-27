@@ -1,7 +1,7 @@
 import sys
 import asyncio
 
-from db import pgdb, tsdb
+from db import tsdb
 from job import RecurringJob, register_job, run_jobs
 from weathercan import WeatherReport, WeatherReportEntry
 
@@ -35,7 +35,10 @@ async def weather_main(config):
         # report.parse_data()
 
         for entry in data['entries']:
-            weather_entry = WeatherReportEntry( entry, {"tags":{"region": conf.get('region', '')}})
+            extra_data = {
+                "tags": conf
+            }
+            weather_entry = WeatherReportEntry( entry, extra_data)
 
         # logger.success(f'Got "{conf["name"]:18}" report. temp: {rep.temperature}')
 

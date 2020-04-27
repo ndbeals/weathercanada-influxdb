@@ -2,7 +2,7 @@ import feedparser
 import time
 import re
 from enum import Enum
-from db import tsdb, pgdb
+from db import tsdb#, pgdb
 
 from config import logger
 
@@ -143,7 +143,7 @@ class WeatherReportEntry():
         # print(json_body)
         tsdb.write_points(json_body, database='weather_data')
 
-        logger.debug('Region: "{}". temp: {} C', tags['region'], self.temperature)
+        logger.debug(f'Region: "{tags["region"]:10}". temp: {self.temperature} C')
 
     # async def commit_forecast(self):
 import datetime

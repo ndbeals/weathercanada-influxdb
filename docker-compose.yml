@@ -1,0 +1,98 @@
+version: "3"
+services:
+    weathercan-python:
+        # image: python:3.8
+        
+        build: 
+            context: ./
+            dockerfile: ./docker/Dockerfile
+        container_name: weathercan-python
+        restart: unless-stopped
+        # tmpfs: "true"
+        environment: 
+            ENV: "production"
+        volumes: 
+            - ./:/opt/weather
+        # command: bash -c "pip install pipenv && cd /opt && pipenv install && pipenv run weathercanada_atom"
+    # weathercan-postgres:
+        # images: postgres:12
+        # container_name: weathercan-postgres
+        # ports:
+        #     - 
+    speedtest:
+        image: barrycarey/speedtest-for-influxdb-and-grafana
+        container_name: speedtest
+        hostname: homeserver
+        volumes:
+            - ./config.ini:/src/config.ini
+        restart: always
+    
+    hddtemp:
+        image: drewster727/hddtemp-docker
+        container_name: hddtemp
+        hostname: homeserver
+        privileged: true
+        environment:
+            HDDTEMP_ARGS: "-q -d -F /dev/sd*"
+            TZ: "America/Chicago"
+        
+    telegraf:
+        image: telegraf:latest
+        container_name: telegraf
+        hostname: homeserver
+        privileged: true
+        restart: unless-stopped
+        links:
+            - influxdb
+        environment:
+            HOST_PROC: /host/proc
+            HOST_SYS: /host/sys
+            HOST_ETC: /host/etc
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - /sys:/host/sys:ro
+            - /proc:/host/proc:ro
+            - /etc:/host/etc:ro
+            - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+            - /data/zp01:/data/zp01
+            - /data/zp02:/data/zp02
+            - /data/zp03:/data/zp03
+            - /:/host/root:ro
+        
+    influxdb:
+        image: influxdb:1.5
+        container_name: influxdb
+        hostname: homeserver
+        environment:
+            INFLUXDB_DATA_CACHE_SNAPSHOT_WRITE_COLD_DURATION: 25m
+        volumes:
+            - influxdb_data:/var/lib/influxdb
+        ports:
+            - 192.168.0.11:8086:8086
+        restart: always
+    chronograf:
+        image: chronograf:1.5
+        container_name: chronograf
+        hostname: homeserver
+        volumes:
+            - chronograf_data:/var/lib/chronograf
+        ports:
+            - 192.168.0.11:8087:8888
+        restart: always
+    grafana:
+        image: grafana/grafana
+        container_name: grafana
+        hostname: homeserver
+        environment:
+            GF_INSTALL_PLUGINS: snuids-radar-panel 1.4.4, grafana-piechart-panel 1.4.0, grafana-worldmap-panel 0.2.1, vonage-status-panel 1.0.9, natel-discrete-panel, briangann-gauge-panel, jdbranham-diagram-panel, grafana-simple-json-datasource
+        ports:
+            - 192.168.0.11:3001:3000
+        volumes:
+            - grafana_data:/var/lib/grafana
+        restart: always
+
+
+volumes:
+    influxdb_data:
+    chronograf_data:
+    grafana_data:

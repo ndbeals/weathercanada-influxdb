@@ -26,3 +26,23 @@ weather:
             province: ontario
             display_name: Port Perry, ON
             url: https://weather.gc.ca/rss/city/on-149_e.xml
+        -   region: algonquin
+            province: ontario
+            display_name: Algonquin Park (Brent), ON
+            url: https://weather.gc.ca/rss/city/on-1_e.xml
+        -   region: belleville
+            province: ontario
+            display_name: Belleville, ON
+            url: https://weather.gc.ca/rss/city/on-3_e.xml
+        -   region: peterborough
+            province: ontario
+            display_name: Peterborough, ON
+            url: https://weather.gc.ca/rss/city/on-121_e.xml
+        -   region: bancroft
+            province: ontario
+            display_name: Bancroft, ON
+            url: https://weather.gc.ca/rss/city/on-102_e.xml
+        -   region: whitby
+            province: ontario
+            display_name: Whitby, ON
+            url: https://weather.gc.ca/rss/city/on-119_e.xml

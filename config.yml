@@ -1,0 +1,14 @@
+general:
+    update_interval: 1
+
+jobs:
+    - RecurringWeatherJob:
+        interval: 300   
+        name: oshawa_weather
+        region: oshawa
+        url: https://weather.gc.ca/rss/city/on-117_e.xml
+    - RecurringWeatherJob:
+        interval: 300   
+        name: portperry_weather
+        region: portperry
+        url: https://weather.gc.ca/rss/city/on-149_e.xml

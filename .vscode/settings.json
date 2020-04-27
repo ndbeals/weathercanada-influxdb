@@ -1,0 +1,8 @@
+{
+    "python.pythonPath": "/home/nate/.local/share/virtualenvs/weathercanada-atom-RgD8taSU/bin/python3.8",
+    "python.pipenvPath": "/usr/local/bin/pipenv",
+    "python.venvPath": "/home/nate/.local/share/virtualenvs",
+    "python.formatting.provider": "black",
+    "editor.wordWrap": "bounded",
+    "editor.wordWrapColumn": 120
+}

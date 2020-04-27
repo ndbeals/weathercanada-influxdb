@@ -6,9 +6,11 @@ logger.add(sys.stderr, format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | <
 import yaml
 import pathlib
 
+print("CONFIG LOADED")
 # with pathlib.Path().open('config.yml','r') as fp:
 # fff = pathlib.Path(__file__).parent.parent
 _base_path = pathlib.Path(__file__).parent.parent 
+
 config_file = _base_path / 'config.yml'
 with config_file.open('r') as fp:
     config = yaml.load(fp, Loader=yaml.FullLoader )

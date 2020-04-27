@@ -4,15 +4,18 @@ import time
 from time import time as scalar_time
 import datetime
 
-jobs = []
+_jobs = []
+_tasks = []
 
 def register_job(job):
-    jobs.append(job)
+    _jobs.append(job)
 
 async def run_jobs():
-    for job in jobs:
+    for job in _jobs:
         task = asyncio.create_task( job.run() )
+        _tasks.append(task)
 
+    await asyncio.sleep(0)
 
 class Job():
     def __init__(self, func, func_args=[],register=True):
@@ -32,10 +35,6 @@ class Job():
             print(f"Task ex caught: {ex}\n {self.func_args}")
         finally:
             pass
-
-
-    def runSync(self):
-        pass
 
     def did_execute(self):
         return self._did_execute
@@ -71,7 +70,7 @@ class RecurringJob(TimedJob):
             print(f'Caught quit on Job, odd.')
             self.task.cancel()
             try:
-                task.exception()
+                self.task.exception()
             except Exception as ex:
                 pass
 

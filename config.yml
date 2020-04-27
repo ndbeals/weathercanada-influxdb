@@ -12,3 +12,17 @@ jobs:
         name: portperry_weather
         region: portperry
         url: https://weather.gc.ca/rss/city/on-149_e.xml
+
+
+weather:
+    update_interval: 300 # seconds
+    time_between: 5 # seconds
+    regions:
+        -   region: oshawa
+            province: ontario
+            display_name: Oshawa, ON
+            url: https://weather.gc.ca/rss/city/on-117_e.xml
+        -   region: portperry
+            province: ontario
+            display_name: Port Perry, ON
+            url: https://weather.gc.ca/rss/city/on-149_e.xml

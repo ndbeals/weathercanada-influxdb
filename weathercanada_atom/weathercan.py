@@ -4,6 +4,8 @@ import re
 from enum import Enum
 from db import tsdb, pgdb
 
+from config import logger
+
 MATCH_CURRENT_CONDITIONS = re.compile(r'.*at:.....([\w\s:]*).*\n.*Condition:.....([\w\s:]*).*\n.*Temperature[^-0-9]*(-?\d+\.?\d*).*\n.*Pressure\D*(\d+\.?\d*).*\n.*Visibility.{0,6}((?:\d+\.?\d*)|(?:\w+)).*\n.*Humidity\D*(\d+\.?\d*).*\n.*Dewpoint[^-0-9]*(-?\d+\.?\d*).*\n.*Wind.*?([A-Z]+)\s(\d+).*?\s?gust\s?(\d+).*\n.*Index\D*(\d+)',re.IGNORECASE)
 
 class ReportEntryType(Enum):
@@ -21,19 +23,21 @@ class WeatherReportEntry():
         "humidity": re.compile(r'Humidity\D*(\d+\.?\d*)',re.IGNORECASE),
         "dewpoint": re.compile(r'Dewpoint[^-0-9]*(-?\d+\.?\d*)',re.IGNORECASE),
         "wind": re.compile(r'Wind.*?([A-Z]+)\s(\d+).*?\s?gust\s?(\d+)',re.IGNORECASE),
-        "wind_direction": re.compile(r'Wind.*?([A-Z]+)\s\d+.*?\s?gust\s?\d+',re.IGNORECASE),
-        "wind_speed": re.compile(r'Wind.*?[A-Z]+\s(\d+).*?\s?gust\s?\d+',re.IGNORECASE),
+        "wind_direction": re.compile(r'Wind.*?([A-Z]+)\s\d+.*?\s?',re.IGNORECASE),
+        "wind_speed": re.compile(r'Wind.*?[A-Z]*\s?(\d+).*?\s?',re.IGNORECASE),
         "wind_gust": re.compile(r'Wind.*?[A-Z]+\s\d+.*?\s?gust\s?(\d+)',re.IGNORECASE),
         "air_index": re.compile(r'Index\D*(\d+)',re.IGNORECASE),
     }
 
 
-    def __init__(self, parent, data, extra_data):
-        super().__init__()
-        self.parent = parent
+    def __init__(self, data, extra_data, parent = None):
+        # super().__init__()
         if data:
             self.extra_data = extra_data
             self.parse_data(data)
+
+        if parent:
+            self.parent = parent
 
     def parse_data(self, data):
         self.raw_data = data
@@ -54,13 +58,12 @@ class WeatherReportEntry():
         elif term == 'Weather Forecasts':
             self.type = ReportEntryType.WEATHER_FORECASTS
 
-    def try_regex(self, regex_name, sstring, transform=lambda x: x ):
+    def try_regex(self, regex_name, search_string, transform=lambda x: x ):
         try:
-            match = self.regex[regex_name].search( sstring )
-            # self[regex_name] = transform(match.group(1))
+            match = self.regex[regex_name].search( search_string )
             return transform(match.group(1))
-        except Exception as identifier:
-            pass
+        except Exception as ex:
+            logger.trace('Exception in regex "{}" caught: {}', regex_name, ex)
         return None
 
     def current_conditions(self, data):
@@ -70,7 +73,7 @@ class WeatherReportEntry():
         self.condition = self.try_regex( 'condition', data['summary'], lambda x: x.lower().strip())
 
         self.temperature = self.try_regex( 'temperature', data['summary'], float )
-        self.parent.temperature = self.temperature
+        # self.parent.temperature = self.temperature
         self.pressure = self.try_regex( 'pressure', data['summary'], float )
 
         vis = self.try_regex( 'visibility', data['summary'] )
@@ -133,12 +136,14 @@ class WeatherReportEntry():
 
         # now = datetime.datetime.now(tz=datetime.timezone.utc)
         # hour = now.replace(minute=0,second=0,microsecond=0)
-        ss = (f"""delete from "weather_data" where time > '{time.strftime('%Y-%m-%dT%H:%M:%SZ',self.updated_at)}' and time < '{time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}' """)
+        ss = (f"""delete from "weather_data" where region='{tags['region']}' and time > '{time.strftime('%Y-%m-%dT%H:%M:%SZ',self.updated_at)}' and time < '{time.strftime('%Y-%m-%dT%H:%M:%SZ',time.gmtime())}' """)
         # ss = (f"""delete from "weather_data" where time > '{time.asctime(self.updated_at)}' and time < '{(str(hour))[:-6]}' """)
         # print(ss,self.updated_at)
         tsdb.query(ss)
         # print(json_body)
         tsdb.write_points(json_body, database='weather_data')
+
+        logger.debug('Region: "{}". temp: {} C', tags['region'], self.temperature)
 
     # async def commit_forecast(self):
 import datetime
@@ -149,13 +154,16 @@ class WeatherReport():
 
         if url:
             self.extra_data = extra_data
-            self.parse_feed(url)
+            # self.parse_feed(url)
 
 
     def parse_feed(self, url):
         self.feed_url = url
         self.feed_data = feedparser.parse(url)
 
+        self.parse_data()
+        # self.updated_at = self.feed_data['updated_parsed']
+    def parse_data(self):
         self.updated_at = self.feed_data['updated_parsed']
 
         self.entries = []
@@ -163,21 +171,3 @@ class WeatherReport():
             parsed_entry = WeatherReportEntry(self, entry, self.extra_data)
             self.entries.append( parsed_entry )
 
-
-    def commit_data(self):
-        json_body = [
-            {
-                "measurement": "cpu_load_short",
-                "tags": {
-                    "host": "server01",
-                    "region": "us-west"
-                },
-                "time": "2009-11-10T23:00:00Z",
-                "fields": {
-                    "value": 0.64
-                }
-            }
-        ]
-        tsdb.write_points(json_body)
-        # result = tsdb.query('select value from cpu_load_short;')
-        # print("Result: {0}".format(result))

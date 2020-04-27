@@ -3,6 +3,8 @@
     "python.pipenvPath": "/usr/local/bin/pipenv",
     "python.venvPath": "/home/nate/.local/share/virtualenvs",
     "python.formatting.provider": "black",
-    "editor.wordWrap": "bounded",
-    "editor.wordWrapColumn": 120
+    // "editor.wordWrap": "bounded",
+    // "editor.wordWrapColumn": 120,
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
 }

@@ -144,7 +144,7 @@ setup(
         "msgpack==0.6.1",
         "python-dateutil==2.8.1",
         "pytz==2019.3",
-        "pyyaml==5.3.1",
+        "pyyaml==5.4",
         "requests==2.23.0",
         "six==1.14.0",
         "urllib3==1.25.9",

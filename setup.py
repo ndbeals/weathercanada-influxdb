@@ -134,7 +134,7 @@ setup(
     install_requires=[
         "arrow==0.15.5",
         "async-cron==1.6.2",
-        "asyncpg==0.20.1",
+        "asyncpg==0.21.0",
         "certifi==2020.4.5.1",
         "chardet==3.0.4",
         "feedparser==5.2.1",

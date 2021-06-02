@@ -147,7 +147,7 @@ setup(
         "pyyaml==5.3.1",
         "requests==2.23.0",
         "six==1.14.0",
-        "urllib3==1.25.9",
+        "urllib3==1.26.5",
     ],  # Optional
     # List additional groups of dependencies here (e.g. development
     # dependencies). Users will be able to install these using the "extras"

@@ -135,7 +135,7 @@ setup(
         "arrow==0.15.5",
         "async-cron==1.6.2",
         "asyncpg==0.20.1",
-        "certifi==2020.4.5.1",
+        "certifi==2022.12.7",
         "chardet==3.0.4",
         "feedparser==5.2.1",
         "idna==2.9",
